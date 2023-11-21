@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "670881354935",
+    "project_id": "barcode-app-4a65b",
+    "storage_bucket": "barcode-app-4a65b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:670881354935:android:a461a852bf4d7853d3e932",
+        "android_client_info": {
+          "package_name": "com.zirui.barcodereader"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "670881354935-sk4prqtvea2peakce0ei9c7h4vd0elnq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLslJPKjtWiVG573AtJC9hQoV5hIqfUDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "670881354935-sk4prqtvea2peakce0ei9c7h4vd0elnq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
