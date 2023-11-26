@@ -22,6 +22,8 @@ buildscript {
         classpath 'com.google.gms:google-services:4.4.0'
         classpath('com.android.tools.build:gradle:7.4.2')
         classpath('com.facebook.react:react-native-gradle-plugin')
+        implementation fileTree(dir: "libs", include: ["*.jar"])
+        implementation "com.facebook.react:react-native:+"
     }
 }
 
@@ -40,4 +42,7 @@ allprojects {
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
     }
+    
+    apply plugin: 'com.google.gms.google-services'
 }
+
