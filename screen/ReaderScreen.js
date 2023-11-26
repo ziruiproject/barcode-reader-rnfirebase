@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button, Modal, FlatList } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { FIREBASE_AUTH, FIRESTORE_DB } from '../firebase';
-import { collection, getDocs, query, where, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, addDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 
 export default function ReaderScanner() {
     const [hasPermission, setHasPermission] = useState(null);
@@ -15,8 +15,13 @@ export default function ReaderScanner() {
             const { status } = await BarCodeScanner.requestPermissionsAsync();
             setHasPermission(status === 'granted');
         };
-
         getBarCodeScannerPermissions();
+
+        const unsubscribe = fetchScannedHistory();
+
+        // Clean up the listener when the component unmounts
+        return () => unsubscribe();
+
     }, []);
 
     const handleBarCodeScanned = async ({ type, data }) => {
@@ -36,26 +41,23 @@ export default function ReaderScanner() {
         });
     };
 
-    const fetchScannedHistory = async () => {
-        const userUID = FIREBASE_AUTH.currentUser.uid; // Replace with your actual method to get UID
-
-        // Reference to the user's collection of scannedHistories
+    const fetchScannedHistory = () => {
+        const userUID = FIREBASE_AUTH.currentUser.uid;
         const userScannedHistoriesRef = collection(FIRESTORE_DB, `users/${userUID}/scannedHistories`);
-
-        // Query to get scanned histories, ordered by timestamp
         const q = query(userScannedHistoriesRef, orderBy('timestamp', 'desc'));
 
-        // Get the documents
-        const querySnapshot = await getDocs(q);
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const histories = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                timestamp: doc.data().timestamp,
+                ...doc.data(),
+            }));
 
-        // Extract the data from documents
-        const histories = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+            setScannedHistory(histories);
+        });
 
-        // Update the state with scanned history
-        setScannedHistory(histories);
+        // Return the unsubscribe function to stop listening when the component unmounts
+        return unsubscribe;
     };
 
     const openModal = () => {
@@ -80,7 +82,9 @@ export default function ReaderScanner() {
                 style={StyleSheet.absoluteFillObject}
             />
             {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
-            <Button title="Show Scanned History" onPress={openModal} />
+            <View style={styles.buttonContainer}>
+                <Button title="Show Scanned History" onPress={openModal} />
+            </View>
             {/* Button to show scanned history */}
             <Modal
                 animationType="slide"
@@ -135,7 +139,15 @@ const styles = StyleSheet.create({
     modalContent: {
         backgroundColor: 'white',
         padding: 20,
-        borderRadius: 10,
         elevation: 5,
+    },
+    buttonContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        padding: 16,
+        backgroundColor: 'white', // Adjust the background color as needed
+        zIndex: 1,
     },
 });
