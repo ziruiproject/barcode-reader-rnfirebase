@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button, Modal, FlatList } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import { signOut } from 'firebase/auth';
 import { FIREBASE_AUTH, FIRESTORE_DB } from '../firebase';
 import { collection, getDocs, query, where, orderBy, addDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 
@@ -28,7 +29,7 @@ export default function ReaderScanner() {
         setScanned(true);
         const userUID = FIREBASE_AUTH.currentUser.uid;
 
-        alert(`Bar code with type ${type} and data ${data} has been scanned by ${userUID}!`);
+        alert(`Hasil Scan: ${data}`);
 
         // Reference to the user's collection of scannedHistories
         const userScannedHistoriesRef = collection(FIRESTORE_DB, `users/${userUID}/scannedHistories`);
@@ -68,6 +69,14 @@ export default function ReaderScanner() {
         setModalVisible(false);
     };
 
+    const handleLogout = async () => {
+        try {
+            await signOut(FIREBASE_AUTH);
+        } catch (error) {
+            console.error('Error signing out:', error.message);
+        }
+    };
+
     if (hasPermission === null) {
         return <Text>Requesting for camera permission</Text>;
     }
@@ -84,6 +93,7 @@ export default function ReaderScanner() {
             {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
             <View style={styles.buttonContainer}>
                 <Button title="Show Scanned History" onPress={openModal} />
+                <Button title="Logout" onPress={handleLogout} />
             </View>
             {/* Button to show scanned history */}
             <Modal
@@ -98,10 +108,10 @@ export default function ReaderScanner() {
                             data={scannedHistory}
                             keyExtractor={(item) => item.id}
                             renderItem={({ item }) => (
-                                <View>
-                                    <Text>Type: {item.type}</Text>
-                                    <Text>Data: {item.data}</Text>
-                                    <Text>Timestamp: {item.timestamp.toDate().toString()}</Text>
+                                <View style={styles.history}>
+                                    <Text>Tipe: {item.type}</Text>
+                                    <Text>Hasil: {item.data}</Text>
+                                    <Text>Waktu: {item.timestamp.toDate().toString()}</Text>
                                 </View>
                             )}
                         />
@@ -150,4 +160,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white', // Adjust the background color as needed
         zIndex: 1,
     },
+    history: {
+        paddingVertical: 5
+    }
 });
