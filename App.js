@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { FIREBASE_AUTH } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -16,6 +17,7 @@ const LoginScreen = () => {
         // Signed in 
         const user = userCredential.user;
         console.log('jadi gan')
+        navigation.navigate('NextScreen');
         // ...
       })
       .catch((error) => {
