@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import { FIREBASE_AUTH, FIRESTORE_DB } from '../firebase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 export default function ReaderScanner() {
     const [hasPermission, setHasPermission] = useState(null);
@@ -15,9 +17,23 @@ export default function ReaderScanner() {
         getBarCodeScannerPermissions();
     }, []);
 
-    const handleBarCodeScanned = ({ type, data }) => {
+    const handleBarCodeScanned = async ({ type, data }) => {
         setScanned(true);
-        alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+        const userUID = FIREBASE_AUTH.currentUser.uid;
+
+        alert(`Bar code with type ${type} and data ${data} has been scanned by ${userUID}!`);
+
+        // Reference to the user's collection of scannedHistories
+        const userScannedHistoriesRef = collection(FIRESTORE_DB, `users/${userUID}/scannedHistories`);
+
+        // Add a new document with the scanned data
+        await addDoc(userScannedHistoriesRef, {
+            type,
+            data,
+            timestamp: serverTimestamp(),
+        });
+
+
     };
 
     if (hasPermission === null) {
