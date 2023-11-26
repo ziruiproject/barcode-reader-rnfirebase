@@ -1,22 +1,53 @@
-import { getAuth } from 'firebase/auth';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { FIREBASE_AUTH } from './firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  const handleSignIn = () => {
+    const auth = FIREBASE_AUTH
     // Implement your authentication logic here
-    const auth = getAuth()
-
-    console.log(`Logging in with email: ${email} and password: ${password}`);
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        console.log('jadi gan')
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode)
+        console.log(errorMessage)
+      });
     // You might want to integrate with Firebase, Axios, or other authentication services
   };
 
+  const handleSignUp = () => {
+    const auth = FIREBASE_AUTH
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        console.log('jadi gan')
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode)
+        console.log(errorMessage)
+      });
+
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Masuk / Daftar</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -30,8 +61,11 @@ const LoginScreen = () => {
         value={password}
         secureTextEntry
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
         <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+        <Text style={styles.buttonText}>Daftar</Text>
       </TouchableOpacity>
     </View>
   );
@@ -56,12 +90,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingLeft: 8,
   },
-  button: {
+  signInButton: {
     backgroundColor: 'blue',
     padding: 10,
     borderRadius: 5,
     width: '100%',
     alignItems: 'center',
+    marginBottom: 4
+  },
+  signUpButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 4
   },
   buttonText: {
     color: 'white',
